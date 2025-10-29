@@ -16,51 +16,59 @@ struct MinHeap {
 
     void push(int idx, int weightArr[]) {
         // TODO: insert index at end of heap, restore order using upheap()
-        data[size-1] = idx;
-        upheap(size-1, weightArr);
+        data[size] = idx;
+        size++;
+        upheap(size, weightArr);
     }
 
     int pop(int weightArr[]) {
         // TODO: remove and return smallest index
         if (size == 0) return -1;
 
-        int temp;
-        temp = weightArr[0];
-        weightArr[0] = weightArr[size - 1];
-        weightArr[size - 1] = temp;
+        int temp = data[0];
+        data[0] = data[size - 1];
+        size--;
 
         downheap(0, weightArr);
+        return temp;
         // Replace root with last element, then call downheap()
-        return -1; // placeholder
     }
 
     void upheap(int pos, int weightArr[]) {
         // TODO: swap child upward while smaller than parent
         int parent = (pos - 1)/2;
-        while (parent > 0) {
-            if (weightArr[pos] < weightArr[parent]) {
+        while (pos > 0) {
+            parent = (pos - 1) / 2;
+            if (weightArr[data[pos]] < weightArr[data[parent]]) {
                 swap(data[parent], data[pos]);
+                pos = parent;
             }
-            parent = (parent - 1) / 2;
+            else break;
         }
     }
 
     void downheap(int pos, int weightArr[]) {
         // TODO: swap parent downward while larger than any child
-        int min = 0;
-        int firstChild = pos*2 + 1;
-        while (firstChild + 1 < 64) {
-            if (weightArr[firstChild] <= weightArr[firstChild+1]) {
-                if (weightArr[pos] > weightArr[firstChild]) {
-                    swap(weightArr[pos], weightArr[firstChild]);
-                }
-                else {
-                    if (weightArr[pos] > weightArr[firstChild+1]) {
-                        swap(weightArr[pos], weightArr[firstChild+1]);
-                    }
-                }
+        int left, right, small = 0;
+        while (true) {
+            left = pos * 2 + 1;
+            right = pos * 2 + 2;
+            small = pos;
+
+            if (left < size && weightArr[data[left]] < weightArr[data[small]]) {
+                small = left;
             }
-            firstChild = firstChild * 2 + 1;
+
+            if (right < size && weightArr[data[right]] < weightArr[data[small]]) {
+                small = right;
+            }
+
+            if (small != pos) {
+                swap(data[pos], data[small]);
+                pos = small;
+            }
+
+            else break;
         }
     }
 };
