@@ -6,6 +6,7 @@
 #include <stack>
 #include <string>
 #include "heap.h"
+#include <utility>
 using namespace std;
 
 // Global arrays for node information
@@ -95,7 +96,6 @@ int buildEncodingTree(int nextFree) {
     // 2. Push all leaf node indices into the heap.
     for (int i = 0; i < nextFree; ++i) {
         heap.push(i, weightArr);
-        heap.upheap(i, weightArr);
     }
     // 3. While the heap size is greater than 1:
     //    - Pop two smallest nodes
@@ -103,22 +103,19 @@ int buildEncodingTree(int nextFree) {
     //    - Set left/right pointers
     //    - Push new parent index back into the heap
     int left = 0, right = 0;
-    while (nextFree > 1) {
-        int sumOfTwo = weightArr[nextFree] + weightArr[nextFree-1];
-        leftArr[left] = heap.pop(weightArr);
-        left++;
-        heap.downheap(0, weightArr);
+    while (heap.size != 1) {
+        left = heap.pop(weightArr);
+        right = heap.pop(weightArr);
+        weightArr[nextFree] = weightArr[left] + weightArr[right];
+        leftArr[nextFree] = left;
+        rightArr[nextFree] = right;
 
-        rightArr[right] = heap.pop(weightArr);
-        right++;
-        heap.downheap(0, weightArr);
-
-        nextFree -= 2;
-        weightArr[nextFree] = sumOfTwo;
         heap.push(nextFree, weightArr);
+        nextFree++;
     }
     // 4. Return the index of the last remaining node (root)
-    return -1; // placeholder
+    int root = heap.pop(weightArr);
+    return root; // placeholder
 }
 
 // Step 4: Use an STL stack to generate codes
@@ -127,6 +124,18 @@ void generateCodes(int root, string codes[]) {
     // Use stack<pair<int, string>> to simulate DFS traversal.
     // Left edge adds '0', right edge adds '1'.
     // Record code when a leaf node is reached.
+    stack<pair<int, string>> st;
+    int i = 0;
+    string path;
+    while (leftArr[i] != -1) {
+        st.emplace(leftArr[i], path + "0");
+    }
+    while (rightArr[i] != -1) {
+        st.emplace(rightArr[i], path + "1");
+    }
+    if (leftArr[i] == -1 && rightArr[i] == -1) {
+        codes[charArr[i] - 'a'] = path;
+    }
 }
 
 // Step 5: Print table and encoded message
